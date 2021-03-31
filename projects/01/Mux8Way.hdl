@@ -1,0 +1,29 @@
+CHIP Mux8Way {
+    IN a, b, c, d, e, f, g, h, sel[3];
+    OUT out;
+
+    PARTS:
+    // Put your code here:
+    Not(in=sel[0], out=Nots0);
+    Not(in=sel[1], out=Nots1);
+    Not(in=sel[2], out=Nots2);
+
+    And4Way(a=a, b=Nots2, c=Nots1, d=Nots0, out=w1);
+    And4Way(a=b, b=Nots2, c=Nots1, d=sel[0], out=w2);
+    And4Way(a=c, b=Nots2, c=sel[1], d=Nots0, out=w3);
+    And4Way(a=d, b=Nots2, c=sel[1], d=sel[0], out=w4);
+    And4Way(a=e, b=sel[2], c=Nots1, d=Nots0, out=w5);
+    And4Way(a=f, b=sel[2], c=Nots1, d=sel[0], out=w6);
+    And4Way(a=g, b=sel[2], c=sel[1], d=Nots0, out=w7);
+    And4Way(a=h, b=sel[2], c=sel[1], d=sel[0], out=w8);
+
+    Or(a=w1, b=w2, out=w12);
+    Or(a=w3, b=w4, out=w34);
+    Or(a=w5, b=w6, out=w56);
+    Or(a=w7, b=w8, out=w78);
+    Or(a=w12, b=w34, out=w1234);
+    Or(a=w56, b=w78, out=w5678);
+
+    Or(a=w1234, b=w5678, out=out);
+
+}
