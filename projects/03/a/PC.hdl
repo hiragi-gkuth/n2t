@@ -16,5 +16,20 @@ CHIP PC {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    Add16(a=fb, b[0]=true, b[1..15]=false, out=Incfb);
+    And16(a=fb, b[0..15]=false, out=zr);
+
+    // flags
+    Not(in=reset, out=Notreset);
+    Or(a=inc, b=load, out=incOrload);
+    Not(in=incOrload, out=incNorload);
+    Or(a=load, b=incNorload, out=loadOrincNorload);
+    And(a=Notreset, b=loadOrincNorload, out=sel00);
+
+    Or(a=load, b=reset, out=loadOrreset);
+    Not(in=loadOrreset, out=sel01);
+
+    // select
+    Mux4Way16(a=zr, b=in, c=Incfb, d=fb, sel[1]=sel01, sel[0]=sel00, out=w1);
+    Register(in=w1, load=true, out=out, out=fb);
 }
