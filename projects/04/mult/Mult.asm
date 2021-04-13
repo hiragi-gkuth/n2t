@@ -9,4 +9,27 @@
 // This program only needs to handle arguments that satisfy
 // R0 >= 0, R1 >= 0, and R0*R1 < 32768.
 
-// Put your code here.
+// Setup
+(SETUP)
+@R2
+M=0
+(MUL)
+// check if completed mul
+@R1
+D=M
+@DONE
+D;JEQ
+// calc
+@R2
+D=M
+@R0
+D=D+M
+@R2
+M=D
+@R1
+M=M-1
+@MUL
+0;JMP
+(DONE)
+@DONE
+0;JMP
