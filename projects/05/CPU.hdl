@@ -39,5 +39,44 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    // Instruction bit splitting
+    And16(a=instruction, b[0..15]=true,
+        out[15]=isCInst,
+        out[0..14]=iAv,
+        out[0]=iCj3, out[1]=iCj2, out[2]=iCj1,
+        out[3]=iCd3, out[4]=iCd2, out[5]=iCd1, 
+        out[6]=iCc1, out[7]=iCc2, out[8]=iCc3,
+        out[9]=iCc4, out[10]=iCc5, out[11]=iCc6,
+        out[12]=iCa);
+
+    // register
+    Not(in=isCInst, out=isAInst);
+    Or(a=iCd1, b=isAInst, out=Aload);
+    Mux16(a[0..14]=iAv, a[15]=false, b=outMPrev, sel=isCInst, out=Ain);
+    ARegister(in=Ain, load=Aload, out=Aout);
+    And(a=isCInst, b=iCd2, out=Dload);
+    DRegister(in=outMPrev, load=Dload, out=Dout);
+
+    // ALU
+    Mux16(a=Aout, b=inM, sel=iCa, out=AMout);
+    ALU(x=Dout, y=AMout, zx=iCc6, nx=iCc5, zy=iCc4, ny=iCc3, f=iCc2, no=iCc1, out=ALUout, zr=zr, ng=ng);
+
+    // PC
+    Not(in=ng, out=ps);
+    Not(in=zr, out=Notzr);
+    And(a=ps, b=Notzr, out=GT);
+    And(a=iCj1, b=ng, out=isLT);
+    And(a=iCj3, b=GT, out=isGT);
+    And(a=iCj2, b=zr, out=isEQ);    
+    And(a=isLT, b=zr, out=isLTE);
+    And(a=isGT, b=zr, out=isGTE);
+    Or8Way(in[0]=isEQ, in[1]=isLT, in[2]=isGT, in[3]=isLTE, in[4]=isGTE, in[5..7]=false, out=j);
+    And(a=isCInst, b=j, out=isJump);
+    PC(in=Aout, load=isJump, inc=true, reset=reset, out=PCout);
+    
+    // output
+    And16(a=ALUout, b[0..15]=true, out=outM, out=outMPrev);
+    And16(a=Aout, b[0..15]=true, out[0..14]=addressM);
+    And16(a=PCout, b[0..15]=true, out[0..14]=pc, out[0..14]=pcPrev);
+    And(a=iCd3, b=isCInst, out=writeM);
 }
