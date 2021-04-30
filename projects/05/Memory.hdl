@@ -27,5 +27,17 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    // Data splitting
+    And16(a[0..14]=address, a[15]=false, b[0..15]=true, out[0..13]=dataArea, out[0..12]=scrArea, out[14]=kbdArea, out[15]=x, out[14]=y, out[13]=z);
+    Nand(a=x, b=z, out=xNandz); And(a=y, b=xNandz, out=m);
+    And(a=y, b=z, out=yAndz); Not(in=x, out=Notx); And(a=Notx, b=yAndz, out=n);
+    DMux4Way(in=load, sel[0]=m, sel[1]=n, a=loadDRAM, b=loadScr);
+
+    // Components
+    RAM16K(in=in, load=loadDRAM, address=dataArea, out=DRAM);
+    Screen(in=in, load=loadScr, address=scrArea, out=scrIO);
+    Keyboard(out=kbdIO);
+
+    // Select logic
+    Mux4Way16(a=DRAM, b=scrIO, d=kbdIO, sel[0]=m, sel[1]=n, out=out);
 }
