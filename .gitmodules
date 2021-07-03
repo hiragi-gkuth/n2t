@@ -1,0 +1,3 @@
+[submodule "projects/06/n2t_assembler"]
+	path = projects/06/n2t_assembler
+	url = git@github.com:hiragi-gkuth/n2t_assembler.git
